@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#111315">
+  <meta name="description" content="Seu espaço para programar, estudar e fazer progresso. Foco, tarefas e notas em um painel pessoal.">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Dev Hub">
+  <title>Lucas Dev Hub</title>
+  <link rel="icon" href="assets/icons/favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png">
+  <link rel="manifest" href="manifest.json">
+  <link rel="stylesheet" href="css/reset.css">
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Ir para o conteúdo</a>
+  <noscript><p class="storage-warning">Ative o JavaScript no navegador para usar o Lucas Dev Hub.</p></noscript>
+  <div id="storage-warning" class="storage-warning" role="alert" hidden></div>
+  <div class="app-shell" id="app-shell">
+    <aside class="sidebar" aria-label="Menu principal">
+      <a class="brand" href="#dashboard" aria-label="Lucas Dev Hub, início">
+        <img class="brand-mark" src="assets/icons/logo.svg" width="40" height="40" alt="">
+        <div><span class="brand-title">Lucas Dev Hub<span class="brand-caption">SEU ESPAÇO DE PROGRESSO</span></span></div>
+      </a>
+      <nav class="nav-list" aria-label="Navegação">
+        <button class="nav-item is-active" data-view="dashboard" aria-current="page"><span data-icon="dashboard"></span><span class="nav-label">Dashboard</span></button>
+        <button class="nav-item" data-view="focus"><span data-icon="focus"></span><span class="nav-label">Foco</span><span id="active-indicator" class="active-indicator" hidden aria-label="Sessão ativa"></span></button>
+        <button class="nav-item" data-view="tasks"><span data-icon="check"></span><span class="nav-label">Tarefas</span></button>
+        <button class="nav-item" data-view="history"><span data-icon="history"></span><span class="nav-label">Histórico</span></button>
+        <button class="nav-item" data-view="stats"><span data-icon="chart"></span><span class="nav-label">Estatísticas</span></button>
+        <button class="nav-item" data-view="notes"><span data-icon="notes"></span><span class="nav-label">Notas</span></button>
+        <button class="nav-item" data-view="settings"><span data-icon="settings"></span><span class="nav-label">Configurações</span></button>
+      </nav>
+      <div class="sidebar-footer">
+        <p class="user-caption"><span class="connection-dot"></span> Um passo de cada vez.</p>
+        <div class="user-profile"><span class="user-avatar" id="user-avatar">L</span><div><p class="user-name" id="user-name">Lucas</p><p class="user-caption">Workspace pessoal</p></div></div>
+      </div>
+    </aside>
+    <main class="main-content" id="main-content" tabindex="-1">
+      <header class="topbar">
+        <p class="breadcrumb">Workspace <span aria-hidden="true">/</span> <span id="current-view-label">Dashboard</span></p>
+        <div class="topbar-actions"><span class="date-label" id="header-date"></span><time class="clock" id="header-clock">--:--</time></div>
+      </header>
+      <section class="view" id="view-dashboard" aria-labelledby="dashboard-title">
+        <div class="page-heading"><div><p class="eyebrow">SEU DIA, COM INTENÇÃO</p><h1 class="page-title" id="dashboard-title">Olá, Lucas</h1><p class="page-subtitle" id="dashboard-subtitle">Um espaço para organizar ideias e transformar foco em progresso.</p></div><span class="badge">Workspace pessoal</span></div>
+        <div class="dashboard-grid">
+          <article class="card hero-card">
+            <div class="hero-top"><span class="hero-label" id="hero-label"><span class="connection-dot"></span> HOJE EM FOCO</span><span class="badge" id="hero-badge">Seu próximo passo começa aqui</span></div>
+            <p class="hero-time" id="hero-time">0min</p><p class="hero-caption" id="hero-caption">Reserve um tempo para o que importa.</p>
+            <div class="hero-actions"><button class="btn btn-primary" id="hero-start"><span data-icon="play"></span><span id="hero-start-label">Começar sessão</span></button><button class="btn btn-ghost" id="hero-pomodoro">Pomodoro <span aria-hidden="true">↗</span></button></div>
+            <div class="hero-orbit" aria-hidden="true"><span></span></div>
+          </article>
+          <article class="card goal-card"><div class="card-header"><h2 class="section-title">Meta diária</h2><button class="icon-btn" id="goal-edit" aria-label="Alterar meta diária"><span data-icon="edit"></span></button></div><p class="goal-value" id="goal-percent">0<span>%</span></p><p class="goal-copy" id="goal-copy">0min de 3h</p><div class="progress" id="goal-progress" role="progressbar" aria-label="Meta diária" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div class="progress-fill" id="goal-fill"></div></div><p class="goal-footer" id="goal-footer">Seu foco de hoje aparece aqui.</p></article>
+        </div>
+        <div class="stats-grid" id="dashboard-stats"></div>
+        <div class="dashboard-lower">
+          <article class="card tasks-card"><div class="card-header"><h2 class="section-title">Tarefas de hoje</h2><button class="text-link" data-view="tasks">Ver todas <span aria-hidden="true">↗</span></button></div><div id="dashboard-tasks"></div><button class="btn btn-ghost btn-small" id="dashboard-add-task"><span data-icon="plus"></span>Adicionar tarefa</button></article>
+          <article class="card shortcuts-card"><div class="card-header"><h2 class="section-title">Seus atalhos</h2><span data-icon="external"></span></div><div class="shortcut-list" id="shortcuts-list"></div></article>
+        </div>
+        <article class="card recent-card"><div class="card-header"><div><h2 class="section-title">Últimas sessões</h2><p class="page-subtitle">Pequenos passos. Progresso real.</p></div><button class="text-link" data-view="history">Ver histórico <span aria-hidden="true">↗</span></button></div><div id="recent-sessions"></div></article>
+      </section>
+      <section class="view focus-view" id="view-focus" aria-labelledby="focus-title" hidden><div id="focus-content"></div></section>
+      <section class="view" id="view-tasks" aria-labelledby="tasks-title" hidden>
+        <div class="page-heading"><div><p class="eyebrow">UMA COISA DE CADA VEZ</p><h1 class="page-title" id="tasks-title">Tarefas</h1><p class="page-subtitle" id="task-summary">Organize o que merece sua atenção.</p></div><button class="btn btn-primary" id="task-add"><span data-icon="plus"></span>Adicionar tarefa</button></div>
+        <div class="card"><div class="task-tools"><label class="field-label" for="task-date">Tarefas do dia</label><input class="input" type="date" id="task-date"><button class="btn btn-secondary" id="task-today">Hoje</button></div><div id="tasks-content"></div></div>
+      </section>
+      <section class="view" id="view-history" aria-labelledby="history-title" hidden><div class="page-heading"><div><p class="eyebrow">CADA SESSÃO CONTA</p><h1 class="page-title" id="history-title">Histórico</h1><p class="page-subtitle">Uma linha do tempo do seu esforço.</p></div><span class="badge" id="history-total"></span></div><div class="filter-bar" id="history-filters" aria-label="Período do histórico"></div><div id="history-content"></div></section>
+      <section class="view" id="view-stats" aria-labelledby="stats-title" hidden><div class="page-heading"><div><p class="eyebrow">CONSISTÊNCIA VIRA PROGRESSO</p><h1 class="page-title" id="stats-title">Estatísticas</h1><p class="page-subtitle">Enxergue seu ritmo. Encontre espaço para crescer.</p></div><span class="badge">Baseado nas suas sessões</span></div><div id="stats-content"></div></section>
+      <section class="view" id="view-notes" aria-labelledby="notes-title" hidden><div class="page-heading"><div><p class="eyebrow">ESPAÇO PARA PENSAR</p><h1 class="page-title" id="notes-title">Notas rápidas</h1><p class="page-subtitle">Uma ideia, um lembrete, seu próximo passo.</p></div><span class="save-status" id="notes-save-status" role="status">Salvo automaticamente</span></div><div class="card notes-card"><label class="sr-only" for="notes-input">Suas notas</label><textarea class="notes-input" id="notes-input" placeholder="Tire uma ideia da cabeça. Coloque aqui…" maxlength="200000" spellcheck="true"></textarea></div></section>
+      <section class="view" id="view-settings" aria-labelledby="settings-title" hidden><div class="page-heading"><div><p class="eyebrow">DO SEU JEITO</p><h1 class="page-title" id="settings-title">Configurações</h1><p class="page-subtitle">Seu espaço, seu ritmo. Seus dados sob seu controle.</p></div></div><div id="settings-content"></div></section>
+    </main>
+  </div>
+  <div class="toast-container" id="toast-container" role="status" aria-live="polite" aria-atomic="true"></div>
+  <script src="js/config.js"></script>
+  <script src="js/utils/time.js"></script>
+  <script src="js/services/storage.js"></script>
+  <script src="js/state.js"></script>
+  <script src="js/utils/dom.js"></script>
+  <script src="js/modules/timer.js"></script>
+  <script src="js/modules/stats.js"></script>
+  <script src="js/modules/history.js"></script>
+  <script src="js/modules/tasks.js"></script>
+  <script src="js/modules/notes.js"></script>
+  <script src="js/modules/settings.js"></script>
+  <script src="js/modules/focus.js"></script>
+  <script src="js/modules/dashboard.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
