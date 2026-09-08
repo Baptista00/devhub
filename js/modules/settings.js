@@ -4,16 +4,6 @@
     var initialized = false;
     var MAX_BACKUP_BYTES = 5 * 1024 * 1024;
 
-    function copySettings() {
-        var current = Hub.state.get().settings;
-        return {
-            userName: current.userName,
-            dailyGoalMinutes: current.dailyGoalMinutes,
-            pomodoroFocusMinutes: current.pomodoroFocusMinutes,
-            pomodoroBreakMinutes: current.pomodoroBreakMinutes
-        };
-    }
-
     function feedback(message) {
         if (Hub.storage.getError()) {
             Hub.ui.toast('Dados atualizados nesta aba, mas não salvos no navegador. Exporte um backup.', 'error');
@@ -255,9 +245,7 @@
             onSubmit: function () {
                 var minutes = validNumber(goal.input, 1, 1440);
                 if (minutes === null) { return false; }
-                var settings = copySettings();
-                settings.dailyGoalMinutes = minutes;
-                Hub.state.update('settings', settings);
+                Hub.state.transact(function (state) { state.settings.dailyGoalMinutes = minutes; }, 'settings');
                 feedback('Meta atualizada');
             }
         });

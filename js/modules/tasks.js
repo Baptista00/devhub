@@ -4,8 +4,8 @@
     var selectedDate;
     var initialized = false;
 
-    function tasksForDate(date) {
-        return Hub.state.get().tasks.filter(function (task) {
+    function tasksForDate(date, tasks) {
+        return (tasks || Hub.state.get().tasks).filter(function (task) {
             return task.date === date;
         }).sort(function (left, right) {
             var difference = (left.order || 0) - (right.order || 0);
@@ -13,8 +13,8 @@
         });
     }
 
-    function persist(tasks, message) {
-        Hub.state.update('tasks', tasks);
+    function persist(mutator, message) {
+        Hub.state.transact(mutator, 'tasks');
         if (Hub.storage.getError()) {
             Hub.ui.toast('Alteração mantida nesta aba. Não foi possível salvar no navegador.', 'error');
             return;
@@ -35,13 +35,15 @@
     }
 
     function toggleTask(id, compact) {
-        persist(Hub.state.get().tasks.map(function (task) {
-            if (task.id !== id) { return task; }
-            var updated = copyTask(task);
-            updated.completed = !updated.completed;
-            updated.completedAt = updated.completed ? new Date().toISOString() : null;
-            return updated;
-        }));
+        persist(function (draft) {
+            draft.tasks = draft.tasks.map(function (task) {
+                if (task.id !== id) { return task; }
+                var updated = copyTask(task);
+                updated.completed = !updated.completed;
+                updated.completedAt = updated.completed ? new Date().toISOString() : null;
+                return updated;
+            });
+        });
         var container = document.getElementById(compact ? 'dashboard-tasks' : 'tasks-content');
         if (!container) { return; }
         var controls = container.querySelectorAll('[data-task-toggle]');
@@ -57,9 +59,9 @@
             confirmLabel: 'Excluir tarefa',
             danger: true,
             onConfirm: function () {
-                persist(Hub.state.get().tasks.filter(function (item) {
-                    return item.id !== task.id;
-                }), 'Tarefa excluída');
+                persist(function (draft) {
+                    draft.tasks = draft.tasks.filter(function (item) { return item.id !== task.id; });
+                }, 'Tarefa excluída');
             }
         });
     }
@@ -97,51 +99,53 @@
                     if (field.input.reportValidity) { field.input.reportValidity(); }
                     return false;
                 }
-                var tasks = Hub.state.get().tasks.slice();
-                if (task) {
-                    tasks = tasks.map(function (item) {
-                        if (item.id !== task.id) { return item; }
-                        var updated = copyTask(item);
-                        updated.title = title;
-                        return updated;
-                    });
-                } else {
-                    var dayTasks = tasksForDate(date);
-                    tasks.push({
-                        id: Hub.time.newId(),
-                        title: title,
-                        completed: false,
-                        createdAt: new Date().toISOString(),
-                        completedAt: null,
-                        date: date,
-                        order: dayTasks.length ? (dayTasks[dayTasks.length - 1].order || 0) + 1 : 0
-                    });
-                }
-                persist(tasks, task ? 'Tarefa atualizada' : 'Tarefa adicionada');
+                persist(function (draft) {
+                    if (task) {
+                        draft.tasks = draft.tasks.map(function (item) {
+                            if (item.id !== task.id) { return item; }
+                            var updated = copyTask(item);
+                            updated.title = title;
+                            return updated;
+                        });
+                    } else {
+                        var dayTasks = tasksForDate(date, draft.tasks);
+                        draft.tasks.push({
+                            id: Hub.time.newId(),
+                            title: title,
+                            completed: false,
+                            createdAt: new Date().toISOString(),
+                            completedAt: null,
+                            date: date,
+                            order: dayTasks.length ? (dayTasks[dayTasks.length - 1].order || 0) + 1 : 0
+                        });
+                    }
+                }, task ? 'Tarefa atualizada' : 'Tarefa adicionada');
             }
         });
         field.input.addEventListener('input', function () { field.input.setCustomValidity(''); });
     }
 
     function moveTask(id, direction, date) {
-        var dayTasks = tasksForDate(date);
-        var index = -1;
-        var orderById = Object.create(null);
-        dayTasks.forEach(function (task, position) {
-            if (task.id === id) { index = position; }
+        persist(function (draft) {
+            var dayTasks = tasksForDate(date, draft.tasks);
+            var index = -1;
+            var orderById = Object.create(null);
+            dayTasks.forEach(function (task, position) {
+                if (task.id === id) { index = position; }
+            });
+            var target = index + direction;
+            if (index < 0 || target < 0 || target >= dayTasks.length) { return false; }
+            var moved = dayTasks[index];
+            dayTasks[index] = dayTasks[target];
+            dayTasks[target] = moved;
+            dayTasks.forEach(function (task, position) { orderById[task.id] = position; });
+            draft.tasks = draft.tasks.map(function (task) {
+                if (task.date !== date) { return task; }
+                var updated = copyTask(task);
+                updated.order = orderById[task.id];
+                return updated;
+            });
         });
-        var target = index + direction;
-        if (index < 0 || target < 0 || target >= dayTasks.length) { return; }
-        var moved = dayTasks[index];
-        dayTasks[index] = dayTasks[target];
-        dayTasks[target] = moved;
-        dayTasks.forEach(function (task, position) { orderById[task.id] = position; });
-        persist(Hub.state.get().tasks.map(function (task) {
-            if (task.date !== date) { return task; }
-            var updated = copyTask(task);
-            updated.order = orderById[task.id];
-            return updated;
-        }));
         var controls = document.getElementById('tasks-content').querySelectorAll('[data-task-move]');
         var fallback;
         for (var i = 0; i < controls.length; i += 1) {

@@ -307,6 +307,8 @@ test('corrupt external storage retains the last valid state in memory', function
 
 test('failed storage event reads preserve the last valid state until access recovers', function () {
     const env = environment();
+    const errors = [];
+    env.hub.storage.onError(function (message) { errors.push(message); });
     env.hub.state.update('notes', 'Nota salva');
     start(env);
     env.shared.failRead = true;
@@ -320,6 +322,34 @@ test('failed storage event reads preserve the last valid state until access reco
     env.shared.values[storageKey] = JSON.stringify(latest);
     env.storageEvent();
     assert.equal(env.hub.state.get().notes, 'Atualizada em outra aba');
+    assert.equal(env.hub.storage.getError(), '');
+    assert.equal(errors[errors.length - 1], '');
+});
+
+test('successful reads do not hide unsaved changes or protected storage warnings', function () {
+    const env = environment();
+    env.hub.state.update('notes', 'Nota salva');
+    env.shared.fail = true;
+    env.hub.state.update('notes', 'Nota ainda não salva');
+    env.hub.storage.get();
+    assert.match(env.hub.storage.getError(), /salvar/);
+    env.shared.failRead = true;
+    env.hub.storage.get();
+    env.shared.failRead = false;
+    env.hub.storage.get();
+    assert.match(env.hub.storage.getError(), /salvar/);
+    assert.equal(env.hub.state.get().notes, 'Nota ainda não salva');
+    env.shared.fail = false;
+    env.hub.state.update('notes', 'Salva após recuperação');
+    assert.equal(env.hub.storage.getError(), '');
+
+    const validRaw = env.shared.values[storageKey];
+    env.shared.values[storageKey] = '{broken';
+    env.storageEvent();
+    env.shared.values[storageKey] = validRaw;
+    env.hub.storage.get();
+    assert.equal(env.hub.storage.isProtected(), true);
+    assert.match(env.hub.storage.getError(), /inválidos/);
 });
 
 test('a write after external removal does not restore deleted data before the storage event', function () {

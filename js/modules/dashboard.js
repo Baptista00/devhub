@@ -22,7 +22,7 @@
     var active = Hub.state.get().activeSession;
     document.getElementById('active-indicator').hidden = !active;
     if (!active) return;
-    ui.text('hero-label', active.stage === 'readyBreak' || active.stage === 'completed' ? 'CICLO CONCLUÍDO' : 'EM FOCO AGORA');
+    ui.text('hero-label-text', active.stage === 'readyBreak' || active.stage === 'completed' ? 'CICLO CONCLUÍDO' : 'EM FOCO AGORA');
     ui.text('hero-time', Hub.time.formatClock(active.type === 'pomodoro' ? Hub.timer.getRemaining() : Hub.timer.getElapsed()));
     ui.text('hero-caption', active.category + (active.stage === 'break' ? ' · Descanso' : active.status === 'paused' ? ' · Pausado' : ' · Seu tempo está sendo contado'));
     if (active.stage === 'readyBreak') ui.text('hero-caption', active.category + ' · Foco registrado. Seu descanso está pronto.');
@@ -35,7 +35,7 @@
     var completed = todayTasks.filter(function (task) { return task.completed; }).length;
     ui.text('dashboard-title', Hub.time.greeting() + ', ' + state.settings.userName);
     ui.text('dashboard-subtitle', state.sessions.length ? 'Bom ter você por aqui. Continue de onde parou.' : 'Bem-vindo ao seu espaço de foco. Um passo de cada vez.');
-    ui.text('hero-label', 'HOJE EM FOCO');
+    ui.text('hero-label-text', 'HOJE EM FOCO');
     ui.text('hero-time', Hub.time.formatDuration(data.today));
     ui.text('hero-caption', data.today ? 'Tempo bem investido no que importa para você.' : 'Reserve um tempo para o que importa.');
     ui.text('hero-badge', state.sessions.length ? data.recentCategory : 'Seu próximo passo começa aqui');
@@ -43,7 +43,7 @@
     document.getElementById('hero-pomodoro').hidden = !!state.activeSession;
     var goal = state.settings.dailyGoalMinutes * 60;
     var percent = Math.floor(data.today / goal * 100);
-    ui.text('goal-percent', percent + '%');
+    document.getElementById('goal-percent').firstChild.nodeValue = String(percent);
     ui.text('goal-copy', Hub.time.formatDuration(data.today) + ' de ' + Hub.time.formatDuration(goal));
     document.getElementById('goal-fill').style.width = Math.min(100, percent) + '%';
     document.getElementById('goal-progress').setAttribute('aria-valuenow', String(Math.min(100, percent)));

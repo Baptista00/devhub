@@ -30,13 +30,13 @@
         <div><span class="brand-title">Lucas Dev Hub<span class="brand-caption">SEU ESPAÇO DE PROGRESSO</span></span></div>
       </a>
       <nav class="nav-list" aria-label="Navegação">
-        <button class="nav-item is-active" data-view="dashboard" aria-current="page"><span data-icon="dashboard"></span><span class="nav-label">Dashboard</span></button>
-        <button class="nav-item" data-view="focus"><span data-icon="focus"></span><span class="nav-label">Foco</span><span id="active-indicator" class="active-indicator" hidden aria-label="Sessão ativa"></span></button>
-        <button class="nav-item" data-view="tasks"><span data-icon="check"></span><span class="nav-label">Tarefas</span></button>
-        <button class="nav-item" data-view="history"><span data-icon="history"></span><span class="nav-label">Histórico</span></button>
-        <button class="nav-item" data-view="stats"><span data-icon="chart"></span><span class="nav-label">Estatísticas</span></button>
-        <button class="nav-item" data-view="notes"><span data-icon="notes"></span><span class="nav-label">Notas</span></button>
-        <button class="nav-item" data-view="settings"><span data-icon="settings"></span><span class="nav-label">Configurações</span></button>
+        <button class="nav-item is-active" data-view="dashboard" aria-label="Dashboard" aria-current="page"><span data-icon="dashboard"></span><span class="nav-label">Dashboard</span></button>
+        <button class="nav-item" data-view="focus" aria-label="Foco"><span data-icon="focus"></span><span class="nav-label">Foco</span><span id="active-indicator" class="active-indicator" hidden aria-label="Sessão ativa"></span></button>
+        <button class="nav-item" data-view="tasks" aria-label="Tarefas"><span data-icon="check"></span><span class="nav-label">Tarefas</span></button>
+        <button class="nav-item" data-view="history" aria-label="Histórico"><span data-icon="history"></span><span class="nav-label">Histórico</span></button>
+        <button class="nav-item" data-view="stats" aria-label="Estatísticas"><span data-icon="chart"></span><span class="nav-label">Estatísticas</span></button>
+        <button class="nav-item" data-view="notes" aria-label="Notas"><span data-icon="notes"></span><span class="nav-label">Notas</span></button>
+        <button class="nav-item" data-view="settings" aria-label="Configurações"><span data-icon="settings"></span><span class="nav-label">Configurações</span></button>
       </nav>
       <div class="sidebar-footer">
         <p class="user-caption"><span class="connection-dot"></span> Um passo de cada vez.</p>
@@ -52,7 +52,7 @@
         <div class="page-heading"><div><p class="eyebrow">SEU DIA, COM INTENÇÃO</p><h1 class="page-title" id="dashboard-title">Olá, Lucas</h1><p class="page-subtitle" id="dashboard-subtitle">Um espaço para organizar ideias e transformar foco em progresso.</p></div><span class="badge">Workspace pessoal</span></div>
         <div class="dashboard-grid">
           <article class="card hero-card">
-            <div class="hero-top"><span class="hero-label" id="hero-label"><span class="connection-dot"></span> HOJE EM FOCO</span><span class="badge" id="hero-badge">Seu próximo passo começa aqui</span></div>
+            <div class="hero-top"><span class="hero-label" id="hero-label"><span class="connection-dot" aria-hidden="true"></span><span id="hero-label-text">HOJE EM FOCO</span></span><span class="badge" id="hero-badge">Seu próximo passo começa aqui</span></div>
             <p class="hero-time" id="hero-time">0min</p><p class="hero-caption" id="hero-caption">Reserve um tempo para o que importa.</p>
             <div class="hero-actions"><button class="btn btn-primary" id="hero-start"><span data-icon="play"></span><span id="hero-start-label">Começar sessão</span></button><button class="btn btn-ghost" id="hero-pomodoro">Pomodoro <span aria-hidden="true">↗</span></button></div>
             <div class="hero-orbit" aria-hidden="true"><span></span></div>
@@ -66,7 +66,7 @@
         </div>
         <article class="card recent-card"><div class="card-header"><div><h2 class="section-title">Últimas sessões</h2><p class="page-subtitle">Pequenos passos. Progresso real.</p></div><button class="text-link" data-view="history">Ver histórico <span aria-hidden="true">↗</span></button></div><div id="recent-sessions"></div></article>
       </section>
-      <section class="view focus-view" id="view-focus" aria-labelledby="focus-title" hidden><div id="focus-content"></div></section>
+      <section class="view focus-view" id="view-focus" aria-label="Foco" hidden><div id="focus-content"></div></section>
       <section class="view" id="view-tasks" aria-labelledby="tasks-title" hidden>
         <div class="page-heading"><div><p class="eyebrow">UMA COISA DE CADA VEZ</p><h1 class="page-title" id="tasks-title">Tarefas</h1><p class="page-subtitle" id="task-summary">Organize o que merece sua atenção.</p></div><button class="btn btn-primary" id="task-add"><span data-icon="plus"></span>Adicionar tarefa</button></div>
         <div class="card"><div class="task-tools"><label class="field-label" for="task-date">Tarefas do dia</label><input class="input" type="date" id="task-date"><button class="btn btn-secondary" id="task-today">Hoje</button></div><div id="tasks-content"></div></div>

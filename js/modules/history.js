@@ -12,8 +12,10 @@
     ui.confirm({ title: 'Excluir sessão?', message: session.category + ' · ' + time.formatDuration(session.duration) +
       '. A meta e as estatísticas serão recalculadas.', confirmLabel: 'Excluir sessão', danger: true,
       onConfirm: function () {
-        Hub.state.update('sessions', Hub.state.get().sessions.filter(function (item) { return item.id !== session.id; }));
-        ui.toast('Sessão excluída.');
+        Hub.state.transact(function (draft) {
+          draft.sessions = draft.sessions.filter(function (item) { return item.id !== session.id; });
+        }, 'sessions');
+        ui.toast(Hub.storage.getError() ? 'Sessão removida nesta aba. Não foi possível salvar no navegador.' : 'Sessão excluída.', Hub.storage.getError() ? 'error' : '');
       } });
   }
   function row(session, canDelete) {
@@ -47,7 +49,9 @@
     filters.forEach(function (filter) {
       var button = ui.button(filter.label, 'filter-btn' + (selected === filter.id ? ' is-active' : ''), function () {
         selected = filter.id; render();
+        document.getElementById('history-filter-' + filter.id).focus();
       });
+      button.id = 'history-filter-' + filter.id;
       button.setAttribute('aria-pressed', String(selected === filter.id));
       filterRoot.appendChild(button);
     });
