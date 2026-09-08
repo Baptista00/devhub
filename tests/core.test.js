@@ -27,7 +27,10 @@ function environment(shared, clock) {
         console: console,
         addEventListener(name, listener) { listeners[name] = listener; },
         localStorage: {
-            getItem(key) { return shared.values[key] || null; },
+            getItem(key) {
+                if (shared.failRead) { throw new Error('read unavailable'); }
+                return Object.prototype.hasOwnProperty.call(shared.values, key) ? shared.values[key] : null;
+            },
             setItem(key, value) {
                 if (shared.fail) { throw new Error('quota'); }
                 shared.values[key] = value;
@@ -266,6 +269,73 @@ test('unavailable storage preserves subsequent changes in memory and reports fai
     env.hub.state.update('notes', 'Recuperada');
     assert.equal(env.reload().hub.state.get().settings.userName, 'Lucas 2');
     assert.equal(env.hub.storage.getError(), '');
+});
+
+test('invalid JSON roots and empty stored text are protected from implicit replacement', function () {
+    ['', 'null', 'false', '0', '""', 'true', '[]', '"text"'].forEach(function (raw) {
+        const shared = { values: { [storageKey]: raw }, fail: false };
+        const env = environment(shared);
+        assert.equal(env.hub.storage.isProtected(), true, raw);
+        assert.match(env.hub.storage.getError(), /inválidos/);
+        env.hub.state.update('notes', 'Nota em memória');
+        assert.equal(shared.values[storageKey], raw);
+        assert.equal(env.hub.state.get().notes, 'Nota em memória');
+        env.hub.state.reset();
+        assert.equal(env.hub.storage.isProtected(), false);
+        assert.equal(env.reload().hub.state.get().notes, '');
+    });
+});
+
+test('corrupt external storage retains the last valid state in memory', function () {
+    ['{bad json', 'null', '{}'].forEach(function (raw) {
+        const env = environment();
+        env.hub.state.update('notes', 'Última nota válida');
+        start(env);
+        env.advance(5000);
+        env.hub.timer.finish();
+        start(env);
+        env.shared.values[storageKey] = raw;
+        env.storageEvent();
+        assert.equal(env.hub.state.get().notes, 'Última nota válida');
+        assert.equal(env.hub.state.get().sessions.length, 1);
+        assert.equal(env.hub.state.get().activeSession.status, 'running');
+        assert.equal(env.hub.storage.isProtected(), true);
+        env.hub.state.update('notes', 'Continua em memória');
+        assert.equal(env.shared.values[storageKey], raw);
+    });
+});
+
+test('failed storage event reads preserve the last valid state until access recovers', function () {
+    const env = environment();
+    env.hub.state.update('notes', 'Nota salva');
+    start(env);
+    env.shared.failRead = true;
+    env.storageEvent();
+    assert.equal(env.hub.state.get().notes, 'Nota salva');
+    assert.equal(env.hub.state.get().activeSession.status, 'running');
+    assert.match(env.hub.storage.getError(), /acessar/);
+    env.shared.failRead = false;
+    const latest = JSON.parse(env.shared.values[storageKey]);
+    latest.notes = 'Atualizada em outra aba';
+    env.shared.values[storageKey] = JSON.stringify(latest);
+    env.storageEvent();
+    assert.equal(env.hub.state.get().notes, 'Atualizada em outra aba');
+});
+
+test('a write after external removal does not restore deleted data before the storage event', function () {
+    const env = environment();
+    env.hub.state.update('notes', 'Nota apagada');
+    start(env);
+    env.advance(5000);
+    env.hub.timer.finish();
+    start(env);
+    delete env.shared.values[storageKey];
+    env.hub.state.transact(function (state) { state.settings.userName = 'Novo nome'; }, 'settings');
+    const recovered = env.reload().hub.state.get();
+    assert.equal(recovered.settings.userName, 'Novo nome');
+    assert.equal(recovered.notes, '');
+    assert.equal(recovered.sessions.length, 0);
+    assert.equal(recovered.activeSession, null);
 });
 
 test('impossible dates and malformed persisted active state are rejected safely', function () {

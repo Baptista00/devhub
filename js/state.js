@@ -161,7 +161,8 @@
     function readLatest() {
         if (memoryOnly || Hub.storage.isProtected()) { return current; }
         var stored = Hub.storage.get();
-        if (!stored) { return current; }
+        if (stored === undefined) { return current; }
+        if (stored === null) { return defaults(); }
         try { return normalize(stored, false); } catch (error) {
             Hub.storage.protect(error.message + ' O conteúdo original foi preservado. Importe um backup ou apague os dados nas configurações.');
             return current;
@@ -176,7 +177,8 @@
         Hub.storage.onChange(function () {
             if (memoryOnly || Hub.storage.isProtected()) { return; }
             var stored = Hub.storage.get();
-            try { current = stored ? normalize(stored, false) : defaults(); } catch (error) {
+            if (stored === undefined) { return; }
+            try { current = stored === null ? defaults() : normalize(stored, false); } catch (error) {
                 Hub.storage.protect(error.message + ' O conteúdo original foi preservado.');
                 return;
             }

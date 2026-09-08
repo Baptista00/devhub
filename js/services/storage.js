@@ -20,11 +20,16 @@
     function get() {
         try {
             var raw = window.localStorage.getItem(KEY);
-            if (!raw) { return null; }
-            try { return JSON.parse(raw); } catch (error) { protect(); return null; }
+            // Only null means absent data; undefined means the read failed.
+            if (raw === null) { return null; }
+            try {
+                var value = JSON.parse(raw);
+                if (!value || typeof value !== 'object' || Array.isArray(value)) { protect(); return undefined; }
+                return value;
+            } catch (error) { protect(); return undefined; }
         } catch (error) {
             report('Não foi possível acessar os dados neste navegador. As alterações ficarão apenas nesta aba. Exporte um backup antes de sair.');
-            return null;
+            return undefined;
         }
     }
 
