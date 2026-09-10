@@ -142,6 +142,41 @@ test('finishing a paused stopwatch includes its final pause', function () {
     assert.equal(RealDate.parse(session.endedAt) - RealDate.parse(session.startedAt), 12000);
 });
 
+test('backward clock changes do not corrupt paused sessions or Pomodoro stages', function () {
+    let env = environment();
+    start(env);
+    env.advance(10000);
+    env.hub.timer.pause();
+    env.advance(-5000);
+    const session = env.hub.timer.finish();
+    assert.equal(session.duration, 10);
+    assert.equal(RealDate.parse(session.endedAt) - RealDate.parse(session.startedAt), 10000);
+    assert.equal(env.reload().hub.state.get().sessions.length, 1);
+
+    env = environment();
+    start(env);
+    env.advance(10000);
+    env.hub.timer.pause();
+    env.advance(20000);
+    env.hub.timer.resume();
+    env.advance(-15000);
+    env.hub.timer.pause();
+    env = env.reload();
+    assert.equal(env.hub.storage.getError(), '');
+    assert.equal(env.hub.state.get().activeSession.status, 'paused');
+
+    env = environment();
+    start(env, 'pomodoro');
+    env.advance(60000);
+    env.hub.timer.tick();
+    const focusEndedAt = env.hub.state.get().activeSession.pausedAt;
+    env.advance(-90000);
+    assert.equal(env.hub.timer.startBreak(), true);
+    env = env.reload();
+    assert.equal(env.hub.storage.getError(), '');
+    assert.equal(env.hub.state.get().activeSession.stageStartedAt, focusEndedAt);
+});
+
 test('session crossing midnight belongs to its starting local date', function () {
     const env = environment(null, { now: new RealDate(2026, 8, 8, 23, 59, 50).getTime() });
     start(env);

@@ -100,7 +100,7 @@
             var active = draft.activeSession;
             if (!isTiming(active) || active.status !== 'running') { return false; }
             active.status = 'paused';
-            active.pausedAt = Math.max(active.stageStartedAt, Date.now());
+            active.pausedAt = Math.max(active.stageStartedAt + active.pausedDuration, Date.now());
         }, 'activeSession');
     }
 
@@ -122,7 +122,7 @@
             if (!active) { return false; }
             if (active.stage === 'focus') {
                 var duration = elapsed(active, now);
-                var endedAt = now;
+                var endedAt = active.status === 'paused' ? Math.max(now, active.pausedAt) : now;
                 if (active.type === 'pomodoro' && duration >= active.focusDuration) {
                     duration = active.focusDuration;
                     endedAt = active.stageStartedAt + active.pausedDuration + duration * 1000;
@@ -147,7 +147,7 @@
             var active = draft.activeSession;
             if (!active || active.type !== 'pomodoro' || active.stage !== 'readyBreak') { return false; }
             active.stage = 'break';
-            active.stageStartedAt = Date.now();
+            active.stageStartedAt = Math.max(Date.now(), active.pausedAt);
             active.status = 'running';
             active.pausedAt = null;
             active.pausedDuration = 0;

@@ -1,5 +1,5 @@
 /* Keep each release together. Bump VERSION whenever an app-shell file changes. */
-var VERSION = 'v1.0.1';
+var VERSION = 'v1.0.2';
 var PREFIX = 'lucas-dev-hub-';
 // Separate deployments in subdirectories must not delete each other's caches.
 var CACHE_PREFIX = PREFIX + encodeURIComponent(self.registration.scope) + '-';
