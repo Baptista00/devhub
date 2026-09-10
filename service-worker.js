@@ -1,5 +1,5 @@
 /* Keep each release together. Bump VERSION whenever an app-shell file changes. */
-var VERSION = 'v1.0.0';
+var VERSION = 'v1.0.1';
 var PREFIX = 'lucas-dev-hub-';
 // Separate deployments in subdirectories must not delete each other's caches.
 var CACHE_PREFIX = PREFIX + encodeURIComponent(self.registration.scope) + '-';
@@ -13,7 +13,10 @@ var FILES = [
   'js/modules/notes.js', 'js/modules/settings.js', 'js/modules/focus.js', 'js/modules/dashboard.js', 'js/app.js'
 ];
 self.addEventListener('install', function (event) {
-  event.waitUntil(caches.open(CACHE).then(function (cache) { return cache.addAll(FILES); }));
+  event.waitUntil(caches.open(CACHE).then(function (cache) {
+    // A new release must not copy older files from the browser's HTTP cache.
+    return cache.addAll(FILES.map(function (file) { return new Request(file, { cache: 'reload' }); }));
+  }));
 });
 self.addEventListener('activate', function (event) {
   event.waitUntil(caches.keys().then(function (keys) {

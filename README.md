@@ -132,7 +132,8 @@ devhub/
 │       └── settings.js
 └── tests/
     ├── core.test.js
-    └── pwa.test.js
+    ├── pwa.test.js
+    └── ui.test.js
 ```
 
 ### Arquivos para conhecer primeiro
@@ -201,6 +202,8 @@ Em `localhost`, `127.0.0.1` e `[::1]`, o registro do service worker fica desativ
 
 O cache guarda uma versão completa dos arquivos da aplicação. Ao alterar um arquivo essencial, atualize `VERSION` em `service-worker.js`. Ao adicionar ou remover um arquivo carregado pelo app, atualize também `FILES`.
 
+A instalação busca os arquivos novamente na rede, sem reaproveitar respostas antigas do cache HTTP. Publique o conjunto completo de arquivos de cada versão; se um arquivo essencial falhar durante a instalação, a versão anterior continua disponível.
+
 Uma nova versão espera as abas da versão anterior serem fechadas. Quando aparecer o aviso de atualização, feche as abas e janelas do Hub, inclusive a janela instalada, e abra novamente. Caches antigos são removidos somente dentro do prefixo e do escopo desta instalação.
 
 Depois de habilitar o teste PWA local, remover `?pwa=1` da URL não remove um service worker já instalado. Para voltar ao desenvolvimento sem cache, cancele o registro do service worker nas ferramentas do navegador e remova apenas os caches correspondentes. Isso evita apagar o `localStorage` junto com os dados de teste.
@@ -222,9 +225,10 @@ Com Node.js disponível, execute na raiz:
 ```bash
 node tests/core.test.js
 node tests/pwa.test.js
+node tests/ui.test.js
 ```
 
-Os testes de núcleo verificam tempo, pausas, restauração, Pomodoro, estatísticas, validação e persistência em um ambiente controlado. Os testes PWA verificam referências de arquivos, manifest, ícones e o ciclo de cache em uma simulação do service worker.
+Os testes de núcleo verificam tempo, pausas, restauração, Pomodoro, estatísticas, validação e persistência em um ambiente controlado. Os testes PWA verificam referências de arquivos, manifest, ícones e o ciclo de cache em uma simulação do service worker, incluindo atualização com cache HTTP antigo. Os testes de interface exercitam os módulos com DOM e eventos simulados.
 
 Esses testes não substituem a execução da interface no navegador nem o teste físico no iPad. Para uma revisão manual, confira:
 

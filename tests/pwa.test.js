@@ -41,7 +41,7 @@ function environment() {
     const stores = new Map();
     const deleted = [];
     const networkRequests = [];
-    const status = { offline: false, failInstall: false, claimed: 0 };
+    const status = { offline: false, failInstall: false, staleHttpCache: false, claimed: 0 };
 
     function keyFor(request) {
         return new URL(typeof request === 'string' ? request : request.url, scope).href;
@@ -53,9 +53,13 @@ function environment() {
         return {
             async addAll(files) {
                 // Cache.addAll is atomic: a failed response rejects the install batch.
-                const responses = files.map(function (file) {
+                const responses = files.map(function (request) {
+                    const file = keyFor(request).slice(scope.length) || './';
                     if (status.failInstall && file === 'js/app.js') { throw new Error('App shell unavailable'); }
-                    return [keyFor(file), { source: 'cache', body: fs.readFileSync(projectFile(file)), url: keyFor(file) }];
+                    const body = status.staleHttpCache && request.cache !== 'reload'
+                        ? Buffer.from('previous release still fresh in the HTTP cache')
+                        : fs.readFileSync(projectFile(file));
+                    return [keyFor(request), { source: 'cache', body: body, url: keyFor(request) }];
                 });
                 responses.forEach(function (entry) { entries.set(entry[0], entry[1]); });
             },
@@ -65,6 +69,10 @@ function environment() {
 
     const context = {
         Promise: Promise,
+        Request: function (url, options) {
+            this.url = keyFor(url);
+            this.cache = options && options.cache || 'default';
+        },
         self: {
             registration: { scope: scope },
             clients: { claim: async function () { status.claimed += 1; } },
@@ -214,6 +222,17 @@ async function main() {
         await assert.rejects(env.lifecycle('install'), /App shell unavailable/);
         assert.equal(env.stores.get(env.context.CACHE).size, 0);
         assert.equal(env.status.claimed, 0);
+    });
+
+    await test('an updated release fetches fresh shell files despite an older HTTP cache', async function () {
+        const env = environment();
+        env.status.staleHttpCache = true;
+        await env.lifecycle('install');
+        env.status.offline = true;
+        for (const file of env.context.FILES) {
+            const response = await env.request(file);
+            assert.ok(response.body.equals(fs.readFileSync(projectFile(file))), 'Release contains an outdated file: ' + file);
+        }
     });
 
     await test('activate deletes only old caches for this application deployment', async function () {
