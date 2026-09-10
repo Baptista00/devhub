@@ -242,6 +242,14 @@ Esses testes não substituem a execução da interface no navegador nem o teste 
 - Usar teclado e toque, abrir e fechar modais e revisar o layout em orientações horizontal e vertical.
 - Testar o cache offline após o primeiro carregamento e a atualização entre versões.
 
+### Validação realizada em 10/09/2026
+
+As três suítes passaram: 27 verificações de núcleo, 13 de PWA e 8 de interface. As regressões incluem proteção dos registros quando o relógio volta durante uma pausa e atualização do PWA com cache HTTP antigo.
+
+No Chrome, em uma origem local separada para testes, foram conferidos: recarga com cronômetro ativo e pausado; retomada e finalização; atualização de meta, histórico e estatísticas; criação e conclusão de tarefa; persistência de notas e tarefas após recarga; alteração da meta; e um Pomodoro completo de 1 minuto de foco e 1 minuto de descanso, sem duplicar o registro. O layout foi inspecionado em desktop e com larguras de 768 e 390 pixels.
+
+Após instalar o PWA local com `?pwa=1`, o servidor foi desligado. A aplicação recarregou e abriu uma URL com query inédita pelo cache; a navegação e a conclusão do descanso continuaram funcionando. A atualização entre versões permanece coberta pela simulação automatizada. Instalação, toque, som e compatibilidade no iPad/Safari ainda exigem validação no aparelho.
+
 ## Roadmap
 
 ### V1 — aplicação local
